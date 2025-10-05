@@ -4,7 +4,7 @@ using namespace std;
 
 void byte_a_binario(unsigned char byte, char* letras);
 void convertir_a_binario();
-
+void encriptar_binario();
 
 
 int main() {
@@ -42,7 +42,42 @@ void byte_a_binario(unsigned char byte, char* letras){
 
         letras[8] = '\0';
     }
+void encriptar_binario() {
 
+    // Abrir el archivo de texto que tiene los 1s y 0s
+    ifstream archivo_2("Binario.txt", ios::binary);
+    if (!archivo_2.is_open()) {
+        cout << "Error en la encriptacion.\n";
+        return;
+    }
+
+    // Obtener su tamaño
+    archivo_2.seekg(0, ios::end);
+    streamsize tamano = archivo_2.tellg();
+    archivo_2.seekg(0, ios::beg);
+
+    // Variables para recorrer cada bit y guardarlos en un arreglo
+    char bit;
+    char* unos_y_ceros = new char[tamano + 1];
+    int i = 0;
+
+    // Bucle para recorrer cada bit e ir agregando al arreglo
+    while (archivo_2.get(bit)) {
+        unos_y_ceros[i] = bit;
+        i++;
+    }
+
+    unos_y_ceros[tamano] = '\0';
+    archivo_2.close();
+
+
+    for (int i = 0; i < tamano; i++) {
+        cout << unos_y_ceros[i];
+    }
+    cout << endl;
+
+    delete[] unos_y_ceros;
+}
 void convertir_a_binario() {
     int n;
     do {
@@ -87,8 +122,20 @@ void convertir_a_binario() {
     archivo.close();
     binario.close();
 
-    cout << "El archivo ha sido convertido correctamente a Binario.txt.\n";
+    bool existe_binario = true;
+
+    if (existe_binario){
+        encriptar_binario();
+    }
+
+
+
+
+
+
 }
+
+
 
 
 
