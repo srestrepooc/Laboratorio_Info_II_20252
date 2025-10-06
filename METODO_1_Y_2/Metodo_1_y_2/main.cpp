@@ -42,7 +42,7 @@ void byte_a_binario(unsigned char byte, char* letras){
 
         letras[8] = '\0';
     }
-void encriptar_binario() {
+void encriptar_binario(int n) {
 
     // Abrir el archivo de texto que tiene los 1s y 0s
     ifstream archivo_2("Binario.txt", ios::binary);
@@ -70,13 +70,118 @@ void encriptar_binario() {
     unos_y_ceros[tamano] = '\0';
     archivo_2.close();
 
+    cout<<endl;
+
 
     for (int i = 0; i < tamano; i++) {
         cout << unos_y_ceros[i];
     }
     cout << endl;
 
+
+
+    //Se empieza a encriptar el archivo binario----------------------------------------------------------||||||||||
+    int total_bits = i;
+    int grupos = (total_bits + n - 1) / n;
+
+    //Se reserva memoria para el nuevo arreglo que va a almacenar el resultado de la encriptación
+    char* encriptado = new char[total_bits + 1];
+
+    int unos;
+    int ceros;
+
+
+    //Este for me marca el recorrido por cada grupo de n bits hasta llegar al último
+    for (int j=0; j < grupos;j++) {
+        int inicio = j * n;
+        int fin = inicio + n;
+        if (fin > total_bits) fin = total_bits;
+
+        //contar los 1s y 0s despues de pasar al segundo grupo
+        if (j > 0){
+            //Cuento los 1s y 0s del grupo actual
+            unos = 0;
+            ceros = 0;
+            for (int k=inicio; k < fin;k++) {
+                if (unos_y_ceros[k] == '1') unos++;
+                else ceros++;
+            }
+
+        }
+
+        //copia temporal del grupo con respecto a la posición en la que este unos_y_ceros
+        char grupo[8] = {0};
+        int tam_grupo = fin - inicio;
+        for (int l=0; l < tam_grupo;l++){
+            grupo[l] = unos_y_ceros[inicio + l];
+        }
+
+        // Aplicar reglas de inversión
+        if (j == 0) {
+
+            //Primer grupo: invertir todos los bits
+            for (int k=0; k < tam_grupo;k++) {                //Esta condición solo se ejecuta una vez con el primer grupo para invertir sus bits
+                grupo[k] = (grupo[k] == '1') ? '0' : '1';
+            }
+
+            //Cuento los 1s y 0s del grupo actual
+            unos = 0;
+            ceros = 0;
+            for (int k=inicio; k < fin;k++) {
+                if (unos_y_ceros[k] == '1') unos++;
+                else ceros++;
+            }
+
+
+        } else {
+            // Grupos siguientes
+            if (unos == ceros) {
+                for (int k=0; k < tam_grupo;k++) {
+                    grupo[k] = (grupo[k] == '1') ? '0' : '1';    //Si grupo enn la posición k es igual 1, entoces se cambia por 0 y viciversa
+                }
+            } else if (ceros > unos) {
+                // Invertir cada 2 bits
+                for (int k=0; k < tam_grupo; k += 2) {         //Invierte cada 2 bits empezando desde la posición 0, mientras k sea menor a tam_grupo
+                    grupo[k] = (grupo[k] == '1') ? '0' : '1';
+
+                }
+            } else {
+                // Invertir cada 3 bits
+                for (int k=0; k < tam_grupo; k += 3) {
+                    grupo[k] = (grupo[k] == '1') ? '0' : '1';     //Invierte cada 3 bits empezando desde la posición 0, mientras k sea menor a tam_grupo
+                }
+            }
+        }
+
+        // Guardar grupo en el arreglo final
+        for (int k=0; k < tam_grupo;k++) {                     //Voy guardando el grupo transformado desde la posición actual y final
+            encriptado[inicio + k] = grupo[k];                 //Finaliza el ciclo para el grupo en la posición de inicio
+        }
+    }
+
+    encriptado[total_bits] = '\0';
+
+
+    //Escribir en el archivo de salida el resultado de la encriptación
+    ofstream salida("Encriptado.txt", ios::binary);
+    if (!salida.is_open()) {
+        cout << "Error al crear Encriptado.txt\n";
+        delete[] unos_y_ceros;
+        delete[] encriptado;
+        return;
+    }
+
+    salida << encriptado;
+    salida.close();
+
+    cout << "Archivo Encriptado.txt generado correctamente.\n";
+
+    // Liberar memoria
     delete[] unos_y_ceros;
+    delete[] encriptado;
+
+
+
 }
 void convertir_a_binario() {
     int n;
@@ -125,7 +230,7 @@ void convertir_a_binario() {
     bool existe_binario = true;
 
     if (existe_binario){
-        encriptar_binario();
+        encriptar_binario(n);
     }
 
 
