@@ -3,9 +3,10 @@
 using namespace std;
 
 void byte_a_binario(unsigned char byte, char* letras);
-void convertir_a_binario();
 void rotacion_izquierda(char* arreglo, int tamano, int n);
 void encriptar_binario();
+void convertir_a_binario();
+
 
 
 
@@ -59,6 +60,7 @@ void rotacion_izquierda(char* arreglo, int tamano, int n){
         bits_restantes++;
 
         if (bits_restantes == n){
+            cout<<"\nEste es el valor actual\n"<<valor_actual<<endl;
             for (int j=n-1;j >= 0;j--){
                 grupos[indice * n + j] = ((valor_actual >> j) & 1) + '0';
             }
@@ -334,16 +336,8 @@ void convertir_a_binario() {
     archivo.close();
     binario.close();
 
-    bool existe_binario = true;
 
-    if (existe_binario){
-        encriptar_binario(n);
-    }
-
-
-
-
-
+    encriptar_binario(n);
 
 }
 
