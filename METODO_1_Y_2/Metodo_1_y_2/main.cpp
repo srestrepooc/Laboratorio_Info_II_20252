@@ -4,7 +4,9 @@ using namespace std;
 
 void byte_a_binario(unsigned char byte, char* letras);
 void convertir_a_binario();
+void rotacion_izquierda(char* arreglo, int tamano, int n);
 void encriptar_binario();
+
 
 
 int main() {
@@ -42,7 +44,77 @@ void byte_a_binario(unsigned char byte, char* letras){
 
         letras[8] = '\0';
     }
+void rotacion_izquierda(char* arreglo, int tamano, int n){
+    int tamano_grupo = tamano / n;
+    char* grupos = new char[tamano];
+
+
+    //Formar grupos
+    int indice = 0;
+    int bits_restantes = 0;
+    char valor_actual = 0;
+
+    for (int i=0;i < tamano;i++){
+        valor_actual = (valor_actual << 1) | (arreglo[i] - '0');
+        bits_restantes++;
+
+        if (bits_restantes == n){
+            for (int j=n-1;j >= 0;j--){
+                grupos[indice * n + j] = ((valor_actual >> j) & 1) + '0';
+            }
+            indice++;
+            bits_restantes = 0;
+            valor_actual = 0;
+        }
+    }
+    //Desplazar cada grupo de n bits 1 posición a la derecha
+    char* desplazado = new char[tamano];
+    for (int i=0;i < tamano_grupo;i++){
+        desplazado[i*n] = grupos[i*n + n-1];            //nueva posición del bit en la posición cero, posición cero del grupo actual
+        for (int j=1;j < n;j++){
+            desplazado[i*n + j] = grupos[i*n + j-1];    //nueva posición del bit en la posición uno, cada posición del grupo actual hasta n
+        }
+    }
+    //Pedir nombre del archivo de salida-------------Archivo final con todas las transformaciones
+    char nombre[20];
+    bool es_correcto = false;
+
+    do{
+        cout<<"Ingrese el nombre del archivo de salida:"<<endl;
+        cin>>nombre;
+
+        int longitud = 0;
+        while (nombre[longitud] != '\0'){
+            longitud++;
+        }
+
+        if (longitud > 4 && nombre[longitud - 4] == '.' && nombre[longitud - 3] == 't' && nombre[longitud - 2] == 'x' && nombre[longitud - 1] == 't'){
+            es_correcto = true;
+        }else {
+            cout<<"Nombre incorrecto; intente nuevamente"<<endl;
+        }
+    }while (!es_correcto);
+
+    //Escribir el resultado en el archivo de salida-------desplazado
+    ofstream archivo_final(nombre);
+    if (!archivo_final.is_open()) {
+        cout << "Error en la encriptacion.\n";
+        delete[]grupos;
+        delete[]desplazado;
+        return;
+    }
+    for (int i=0;i < tamano;i++){
+        archivo_final << desplazado[i];
+    }
+    archivo_final.close();
+
+    delete[]grupos;
+    delete[]desplazado;
+
+}
 void encriptar_binario(int n) {
+
+    int semilla = n;
 
     // Abrir el archivo de texto que tiene los 1s y 0s
     ifstream archivo_2("Binario.txt", ios::binary);
@@ -180,9 +252,44 @@ void encriptar_binario(int n) {
     delete[] unos_y_ceros;
     delete[] encriptado;
 
+    //Aquí comienza la rotación de 1 bit hacia la izquierda a cada bit de cada grupo-----------------------------||||
+    //validación de nombre de salida del archivo
 
 
-}
+
+
+
+        ifstream binario("Encriptado.txt", ios::binary);
+        if (!binario.is_open()) {
+            cout << "Error en la encriptacion.\n";
+            return;
+        }
+
+        // Obtener su tamaño
+        binario.seekg(0, ios::end);
+        streamsize tamano_2 = binario.tellg();
+        binario.seekg(0, ios::beg);
+
+        // Variables para recorrer cada bit y guardarlos en un arreglo
+        char bit_2;
+        char* num_binarios = new char[tamano_2 + 1];
+        int s = 0;
+
+        // Bucle para recorrer cada bit e ir agregando al arreglo
+        while (binario.get(bit_2)) {
+            num_binarios[s] = bit_2;
+            s++;
+        }
+
+        num_binarios[tamano_2] = '\0';
+        binario.close();
+
+        cout<<endl;
+
+        //Invocación de la función para desplazar 1 bit a la izquierda los n grupos
+        rotacion_izquierda(num_binarios, tamano_2, semilla );
+
+    }
 void convertir_a_binario() {
     int n;
     do {
