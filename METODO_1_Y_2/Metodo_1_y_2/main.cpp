@@ -2,12 +2,12 @@
 #include <fstream>
 using namespace std;
 
+
+
 void byte_a_binario(unsigned char byte, char* letras);
 void rotacion_izquierda(char* arreglo, int tamano, int n);
 void encriptar_binario();
 void convertir_a_binario();
-
-
 
 
 int main() {
@@ -19,19 +19,28 @@ int main() {
         cout<<"1. Encriptar archivo\n";
         cout<<"2. Desencriptar archivo\n";
         cout<<"3. Salir\n";
-        cin>>opcion;
-
-        if (opcion <= 0 || opcion >= 4){
-            cout<<"Opcion incorrecta, intente de nuevo\n";
+        if (!(cin >> opcion)){
+            cout<<"Entrada no valida\n";
+            cin.clear();
+            cin.ignore(10000, '\n');
         }
-    } while (opcion <= 0 || opcion >= 4);
+        else if (opcion <= 0 || opcion >= 4){
+            cout<<"Opcion no valida\n";
+        }
+
+    } while (cin.fail() || opcion <= 0 || opcion >= 4);
 
     switch (opcion) {
     case 1: convertir_a_binario();
         break;
+    case 2:
+
+        break;
 
     case 3:
         cout << "Saliendo del programa...\n";
+        break;
+    default:
         break;
     }
 
@@ -60,7 +69,6 @@ void rotacion_izquierda(char* arreglo, int tamano, int n){
         bits_restantes++;
 
         if (bits_restantes == n){
-            cout<<"\nEste es el valor actual\n"<<valor_actual<<endl;
             for (int j=n-1;j >= 0;j--){
                 grupos[indice * n + j] = ((valor_actual >> j) & 1) + '0';
             }
@@ -77,6 +85,8 @@ void rotacion_izquierda(char* arreglo, int tamano, int n){
             desplazado[i*n + j] = grupos[i*n + j-1];    //nueva posición del bit en la posición uno, cada posición del grupo actual hasta n
         }
     }
+
+
     //Pedir nombre del archivo de salida-------------Archivo final con todas las transformaciones
     char nombre[20];
     bool es_correcto = false;
@@ -105,6 +115,9 @@ void rotacion_izquierda(char* arreglo, int tamano, int n){
         delete[]desplazado;
         return;
     }
+
+
+    //Pasar datos del arreglo al archivo final txt
     for (int i=0;i < tamano;i++){
         archivo_final << desplazado[i];
     }
@@ -112,6 +125,7 @@ void rotacion_izquierda(char* arreglo, int tamano, int n){
 
     delete[]grupos;
     delete[]desplazado;
+
 
 }
 void encriptar_binario(int n) {
@@ -296,11 +310,17 @@ void convertir_a_binario() {
     int n;
     do {
         cout<<"Ingrese una semilla mayor a 1 y menor a 8: ";
-        cin>>n;
-        if (n <= 1 || n >= 8) {
+        if (!(cin >> n)){
+            cout<<"Entrada no valida\n";
+            cin.clear();
+            cin.ignore(10000, '\n');
+        }
+        else if (n <= 1 || n >= 8) {
             cout<<"Ingrese una semilla correcta.\n";
         }
-    } while (n <= 1 || n >= 8);
+    } while (cin.fail() || n <= 1 || n >= 8);
+
+
 
     string nombre;
     ifstream archivo;
