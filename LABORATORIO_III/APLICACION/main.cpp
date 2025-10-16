@@ -4,7 +4,8 @@
 using namespace std;
 
 void menu_administrador();
-
+void ingreso_usuario();
+bool validar_usuario(const string &cedula_ingresada, const string &clave_ingresada);
 //Funciones para validar el ingreso del administrador
 bool comparar_archivos(const char *archivo1, const char *archivo2);
 unsigned char rotar_izquierda(unsigned char byte);
@@ -41,7 +42,7 @@ int main()
     switch (opcion) {
     case 1: menu_administrador();
         break;
-    case 2:
+    case 2: ingreso_usuario();
 
         break;
 
@@ -177,7 +178,7 @@ void menu_administrador(){
     int cedula = 1037370134;
     int clave = 1234;
 
-    ofstream archivo("sudo.txt", ios::app);
+    ofstream archivo("sudo.txt");
     if (!archivo.is_open()) {
         cout<<"Error al abrir usuarios.txt\n";
         return;
@@ -245,6 +246,121 @@ void menu_administrador(){
     }else {
         cout<<"cedula o clave incorrecta.\n";
         if (remove("validar_administrador.txt") == 0) {
+            cout << "Archivo de validacion eliminado correctamente.\n";
+        } else {
+            cout << "No se pudo eliminar el archivo de validacion.\n";
+        }
+    }
+
+
+}
+
+bool validar_usuario(const string &cedula_ingresada, const string &clave_ingresada) {
+    ifstream archivo("usuarios.txt", ios::binary);
+    if (!archivo.is_open()) {
+        cout << "Error al abrir usuarios.txt" << endl;
+        return false;
+    }
+
+    string linea;
+    int linea_actual = 0;
+
+    while (getline(archivo, linea)) {
+        if (linea_actual % 3 == 0) {
+            if (linea == cedula_ingresada) {
+                string saldo;
+                string clave_archivo;
+
+                getline(archivo, saldo);           //linea 2 para poder tomar la 3
+                getline(archivo, clave_archivo);    // linea 3 para comparar
+
+                archivo.close();
+
+                if (clave_archivo == clave_ingresada) {
+                    return true; //Usuario autenticado
+                }
+                else {
+                    return false; //cedula correcta, pero la clave no
+                }
+            }
+        }
+        linea_actual++;
+    }
+
+    archivo.close();
+    return false; //No se encontro la cedula
+}
+
+void ingreso_usuario(){
+    //Validar ingreso del usuario
+
+    int identificacion;
+    int password;
+
+    // Validación para la cédula
+    do {
+        cout<<"--------Usuario---------\n";
+        cout<<"Ingrese su cedula:\n";
+        if (!(cin >> identificacion)) {
+            cout<<"Entrada no valida. Ingrese solo numeros.\n";
+            cin.clear();
+            cin.ignore(10000, '\n');
+        } else if (identificacion < 1000000 || identificacion > 1999999999) {
+            cout<<"Cedula invalida. Debe tener entre 7 y 10 digitos.\n";
+        }
+    } while (cin.fail() || identificacion < 1000000 || identificacion > 1999999999);
+
+    // Validación para la clave
+    do {
+        cout<<"--------Usuario---------\n";
+        cout<<"Ingrese su clave(max 4 digitos):\n";
+        if (!(cin >> password)) {
+            cout<<"Entrada no valida. Ingrese solo numeros.\n";
+            cin.clear();
+            cin.ignore(10000, '\n');
+        } else if (password < 1000 || password > 9999) {
+            cout<<"Clave invalida.\n";
+        }
+    } while (cin.fail() || password < 1000 || password > 9999);
+
+    ofstream validar("validar_usuario.txt", ios::app);
+    if (!validar.is_open()) {
+        cout<<"Error al crear archivo de comparacion.\n";
+        return;
+    }
+
+    validar << encriptarDato(to_string(identificacion), 4) << endl;
+    validar << encriptarDato(to_string(password), 4) << endl;
+
+    validar.close();
+    cout<<"\nSe creo el archivo para validar el usuario\n";
+
+    string id, contrasena;
+
+    // Leer datos del archivo temporal
+    ifstream comparar("validar_usuario.txt", ios::binary);
+    if (!comparar.is_open()) {
+        cout<<"Error al crear archivo de comparacion.\n";
+        return;
+    }
+    getline(comparar, id);
+    getline(comparar, contrasena);
+    comparar.close();
+
+    // Validar
+    if (validar_usuario(id, contrasena)){
+        cout<<"Acceso permitido, datos correctos\n";
+        if (remove("validar_usuario.txt") == 0) {
+            cout << "Archivo de validacion eliminado correctamente.\n";
+        } else {
+            cout << "No se pudo eliminar el archivo de validacion.\n";
+        }
+        //menu_usuario();
+    }
+
+    else{
+        cout << "Cedula o clave incorrecta\n";
+        if (remove("validar_usuario.txt") == 0) {
             cout << "Archivo de validacion eliminado correctamente.\n";
         } else {
             cout << "No se pudo eliminar el archivo de validacion.\n";
